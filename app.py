@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 # Load the trained model
-model = load_model(r'C:\Users\abnsa\PythonML\STOCK_PROJECT\StockPredictionModel.keras')
+model = load_model(r'StockPredictionModel.keras')
 
 # Streamlit app
 st.header('Stock Market Predictor:')
@@ -105,3 +105,4 @@ st.write(f"Last Closing Price: {last_price:.2f}")
 st.write(f"Predicted Next Day Price: {next_day_price:.2f}")
 st.write(f"Probability of Increase: {prob_increase*100:.2f}%")
 st.write(f"Probability of Decrease: {prob_decrease*100:.2f}%")
+
