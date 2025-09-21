@@ -7,7 +7,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 import datetime
 import matplotlib.pyplot as plt
-import pd.datareader as web
+import pandas_datareader.data as web
+
 
 
 # Load the trained model
@@ -109,6 +110,7 @@ st.write(f"Last Closing Price: {last_price:.2f}")
 st.write(f"Predicted Next Day Price: {next_day_price:.2f}")
 st.write(f"Probability of Increase: {prob_increase*100:.2f}%")
 st.write(f"Probability of Decrease: {prob_decrease*100:.2f}%")
+
 
 
 
