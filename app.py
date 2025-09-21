@@ -29,7 +29,7 @@ end = end_date.strftime("%Y-%m-%d")
 # Download stock data
 data = yf.download(stock, start, end)
 if data.empty:
-    st.error("⚠️ No stock data found for the given symbol and date range. Try another input.")
+    st.error(f"No stock data found for {stock}. Try symbols like AAPL, MSFT, TSLA, or check your date range.")
     st.stop()
 
 
@@ -108,5 +108,6 @@ st.write(f"Last Closing Price: {last_price:.2f}")
 st.write(f"Predicted Next Day Price: {next_day_price:.2f}")
 st.write(f"Probability of Increase: {prob_increase*100:.2f}%")
 st.write(f"Probability of Decrease: {prob_decrease*100:.2f}%")
+
 
 
