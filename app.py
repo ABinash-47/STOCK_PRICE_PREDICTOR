@@ -7,10 +7,11 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 import datetime
 import matplotlib.pyplot as plt
+import pd.datareader as web
 
 
 # Load the trained model
-model = load_model(r'StockPredictionModel.keras')
+model = load_model(r'C:\Users\abnsa\PythonML\STOCK_PROJECT\StockPredictionModel.keras')
 
 # Streamlit app
 st.header('Stock Market Predictor:')
@@ -29,7 +30,7 @@ end = end_date.strftime("%Y-%m-%d")
 # Download stock data
 data = yf.download(stock, start, end)
 if data.empty:
-    st.error(f"No stock data found for {stock}. Try symbols like AAPL, MSFT, TSLA, or check your date range.")
+    st.error("⚠️ No stock data found for the given symbol and date range. Try another input.")
     st.stop()
 
 
@@ -42,8 +43,7 @@ st.write(data)
 data_train, data_test = train_test_split(data, test_size=0.2, shuffle=False)
 data_train = pd.DataFrame(data_train.Close)
 data_test = pd.DataFrame(data_test.Close)
-
-scaler = MinMaxScaler(feature_range=(0,1))
+scaler = joblib.load("scaler.save")
 data_train_scale = scaler.fit_transform(data_train)
 
 # Concatenating past 100 days data to test
@@ -108,6 +108,7 @@ st.write(f"Last Closing Price: {last_price:.2f}")
 st.write(f"Predicted Next Day Price: {next_day_price:.2f}")
 st.write(f"Probability of Increase: {prob_increase*100:.2f}%")
 st.write(f"Probability of Decrease: {prob_decrease*100:.2f}%")
+
 
 
 
