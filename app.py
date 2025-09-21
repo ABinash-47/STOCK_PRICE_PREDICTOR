@@ -12,7 +12,7 @@ import pandas_datareader.data as web
 
 
 # Load the trained model
-model = load_model(r':StockPredictionModel.keras')
+model = load_model(StockPredictionModel.keras')
 
 # Streamlit app
 st.header('Stock Market Predictor:')
@@ -110,6 +110,7 @@ st.write(f"Last Closing Price: {last_price:.2f}")
 st.write(f"Predicted Next Day Price: {next_day_price:.2f}")
 st.write(f"Probability of Increase: {prob_increase*100:.2f}%")
 st.write(f"Probability of Decrease: {prob_decrease*100:.2f}%")
+
 
 
 
