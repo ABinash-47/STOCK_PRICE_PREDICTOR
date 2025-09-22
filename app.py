@@ -6,8 +6,8 @@ import streamlit as st
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 import datetime
-import pandas_datareader.data as web
-import joblib   # needed for loading scaler
+import joblib
+from alpha_vantage.timeseries import TimeSeries
 
 # Load the trained model & scaler
 model = load_model("StockPredictionModel.keras", compile=False)
@@ -23,24 +23,28 @@ stock = st.text_input('Enter Stock Symbol', 'GOOG')
 start_date = st.date_input("Enter start date", datetime.date(2010, 1, 1))
 end_date = st.date_input("Enter end date", datetime.date(2023, 12, 31))
 
-# Convert to string for DataReader
+# Convert to string
 start = start_date.strftime("%Y-%m-%d")
 end = end_date.strftime("%Y-%m-%d")
 
-# Download stock data from Stooq
-# For US stocks like Google, Stooq requires ".US"
+# Alpha Vantage API key
+api_key = "2P5VFXBO27RMLQIM"
+
+# Fetch data from Alpha Vantage
 try:
-    data = web.DataReader(f"{stock}.US", "stooq", start, end)
-    data = data.sort_index()
+    ts = TimeSeries(key=api_key, output_format='pandas')
+    data, meta = ts.get_daily(symbol=stock, outputsize='full')
+    data = data.sort_index()  # ascending order by date
+    data = data.loc[start:end]  # filter by selected dates
 except Exception as e:
     st.error(f"⚠️ Could not fetch data: {e}")
     st.stop()
 
-if data.empty:
-    st.error("⚠️ No stock data found for the given symbol and date range. Try another input.")
-    st.stop()
+#if data.empty:
+ #   st.error("⚠️ No stock data found for the given symbol and date range. Try another input.")
+  #  st.stop()
 
-# Show dataframe in app
+# Show dataframe
 st.subheader(f"{stock} Stock Data ({start} → {end})")
 st.write(data)
 
@@ -48,13 +52,13 @@ st.write(data)
 # DATA PRE_PROCESSING
 # --------------------
 data_train, data_test = train_test_split(data, test_size=0.2, shuffle=False)
-data_train = pd.DataFrame(data_train.Close)
-data_test = pd.DataFrame(data_test.Close)
+data_train = pd.DataFrame(data_train['4. close'])  # Alpha Vantage column name
+data_test = pd.DataFrame(data_test['4. close'])
 
 # Scale
 data_train_scale = scaler.fit_transform(data_train)
 
-# Concatenating past 100 days data to test
+# Concatenate past 100 days
 pas_100_days = data_train.tail(100)
 data_test = pd.concat([pas_100_days, data_test])
 data_test_scale = scaler.transform(data_test)
@@ -72,7 +76,7 @@ x, y = np.array(x), np.array(y)
 # Predictions
 y_predict = model.predict(x)
 
-# Inverse transform (get back original prices)
+# Inverse transform
 y_predict = scaler.inverse_transform(y_predict)
 y = scaler.inverse_transform(y.reshape(-1, 1))
 
@@ -96,14 +100,11 @@ st.pyplot(fig2)
 last_100_days = data_test_scale[-100:]
 last_100_days = np.array(last_100_days).reshape(1, 100, 1)
 
-# Predict the next day's price
 next_day_price = model.predict(last_100_days)
-next_day_price = float(scaler.inverse_transform(next_day_price)[0][0])  # ensure scalar
+next_day_price = float(scaler.inverse_transform(next_day_price)[0][0])
 
-# Get the actual last price from data
-last_price = float(data.Close.iloc[-1])
+last_price = float(data['4. close'].iloc[-1])  # last real price
 
-# Simple probability assignment
 if next_day_price > last_price:
     prob_increase = 0.7
     prob_decrease = 0.3
@@ -111,12 +112,14 @@ else:
     prob_increase = 0.3
     prob_decrease = 0.7
 
-# Show result in Streamlit
+# Show result
 st.subheader("Next Day Prediction")
 st.write(f"Last Closing Price: {last_price:.2f}")
 st.write(f"Predicted Next Day Price: {next_day_price:.2f}")
 st.write(f"Probability of Increase: {prob_increase*100:.2f}%")
 st.write(f"Probability of Decrease: {prob_decrease*100:.2f}%")
+
+
 
 
 
