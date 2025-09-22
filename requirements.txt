@@ -7,3 +7,4 @@ tensorflow==2.17.0
 matplotlib==3.9.1
 pandas-datareader
 joblib
+alpha_vantage
